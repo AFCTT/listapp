@@ -80,15 +80,15 @@ fun UserDetail(id: Int, apiClient: KtorClient = KtorClient()) {
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.ExtraBold,
                             )
-                            StatusBadge(status = user!!.status)
+                           // StatusBadge(status = user!!.status)
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         mapOf(
                             stringResource(R.string.gender_label) to user!!.gender,
-                            stringResource(R.string.location_label) to user!!.location.name,
-                            stringResource(R.string.origin_label) to user!!.origin.name,
-                            stringResource(R.string.species_label) to user!!.species,
-                            stringResource(R.string.status_label) to user!!.status
+                            stringResource(R.string.location_label) to user!!.firstName,
+                            stringResource(R.string.origin_label) to user!!.phone,
+                            stringResource(R.string.species_label) to user!!.birthDate,
+                           // stringResource(R.string.status_label) to user!!.status
                         ).forEach { entry ->
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -102,12 +102,14 @@ fun UserDetail(id: Int, apiClient: KtorClient = KtorClient()) {
                                     color = MaterialTheme.colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyMedium,
                                 )
-                                Text(
-                                    entry.value,
-                                    modifier = Modifier,
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
+                                entry.value?.let {
+                                    Text(
+                                        it,
+                                        modifier = Modifier,
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                }
                                 Spacer(modifier = Modifier.height(4.dp))
                             }
                         }
