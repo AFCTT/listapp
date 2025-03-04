@@ -1,6 +1,6 @@
 package com.juligraph.listapp.ui.screens
 
-import android.R
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -15,12 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.twotone.PlayArrow
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -58,18 +53,26 @@ fun HomeScreen(
     var users by remember { mutableStateOf(listOf<User>()) }
 
     LaunchedEffect(key1 = null) {
-        users = apiClient.getUsers().users
+        try {
+            val response = apiClient.getUsers()
+            users = response.users
+            Log.d("HomeScreen", "Users loaded: ${users.size}")
+            Toast.makeText(context, "Users loaded: ${users.size}", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Log.e("HomeScreen", "Error loading users", e)
+            Toast.makeText(context, "Error loading users: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         stickyHeader {
             Row(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.primary)
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -77,29 +80,23 @@ fun HomeScreen(
                 Text(
                     text = "Users: ${users.size}",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
-
-                OutlinedButton(onClick = {
-                    users = listOf()
-                }) {
-                    Text(
-                        "Borrar Todo",
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                OutlinedButton(onClick = { users = listOf() }) {
+                    Text("Borrar Todo", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
         if (users.isEmpty()) {
-            item {
-                Loader(modifier = Modifier.fillParentMaxSize())
-            }
+            item { Loader(modifier = Modifier.fillMaxSize()) }
         } else {
-            items(users) { usr ->
+            items(users) { user ->
                 ListItem(
                     headlineContent = {
                         Text(
-                            "${usr.firstName} - (${usr.gender})",
+                            text = "${user.firstName} ${user.lastName} - (${user.gender})",
+                            modifier = Modifier,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -107,30 +104,35 @@ fun HomeScreen(
                     },
                     supportingContent = {
                         Text(
-                            "${usr.lastName} - ${usr.birthDate}",
+                            text = "No company data",
+                            modifier = Modifier,
+                            style = MaterialTheme.typography.bodyMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     },
                     leadingContent = {
                         AsyncImage(
-                            model = usr.image,
+                            model = user.image,
                             contentDescription = null,
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .border(4.dp, MaterialTheme.colorScheme.tertiary)
                         )
                     },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.TwoTone.PlayArrow,
-                            contentDescription = null
-                        )
-                    },
+                    trailingContent = { /* Icon removed for simplicity */ },
                     modifier = Modifier.clickable {
-                        Toast.makeText(context, "Tap on ${usr.firstName}", Toast.LENGTH_SHORT).show()
-                        navController.navigate(Routes.UserDetail(usr.id))
-                    },
+                        Log.d("HomeScreen", "Clicked user: ${user.firstName}, ID: ${user.id}")
+                        Toast.makeText(context, "Tap on ${user.firstName}", Toast.LENGTH_SHORT).show()
+                        try {
+                            navController.navigate("userDetail/${user.id}")
+                            Log.d("HomeScreen", "Navigating to userDetail/${user.id}")
+                            Toast.makeText(context, "Navigating to ${user.id}", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Log.e("HomeScreen", "Navigation error", e)
+                            Toast.makeText(context, "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
                 HorizontalDivider()
             }
@@ -142,6 +144,9 @@ fun HomeScreen(
 @Composable
 fun GreetingPreview() {
     AppTheme {
-        HomeScreen(navController = rememberNavController())
+        HomeScreen(
+            navController = rememberNavController(),
+            modifier = Modifier
+        )
     }
 }

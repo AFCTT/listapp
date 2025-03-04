@@ -3,10 +3,10 @@ package com.juligraph.listapp.data
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UsersList(
-    val info: Info,
-    val results: List<User>
+data class UserResponse(
+    val users: List<User>
 )
+
 
 @Serializable
 data class Info(

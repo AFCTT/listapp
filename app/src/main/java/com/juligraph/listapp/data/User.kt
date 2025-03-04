@@ -7,21 +7,14 @@ data class User(
     val id: Int,
     val firstName: String,
     val lastName: String,
-    val image: String,
+    val email: String,
     val phone: String,
-    val email: String? = null,
-    val age: Int? = null,
-    val gender: String? = null,
-    val birthDate: String? = null,
-    val company: Company? = null
+    val gender: String,
+    val image: String
+
 )
 
 @Serializable
 data class Company(
     val name: String
-)
-
-@Serializable
-data class UserResponse(
-    val users: List<User> // Cambiamos "results" por "users"
 )
