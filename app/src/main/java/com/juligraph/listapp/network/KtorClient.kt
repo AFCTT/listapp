@@ -3,6 +3,7 @@ package com.juligraph.listapp.network
 import com.juligraph.listapp.data.UserResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -16,9 +17,9 @@ import kotlinx.serialization.json.Json
 
 class KtorClient {
     private val client = HttpClient(OkHttp) {
-        defaultRequest {
+      /*  defaultRequest {
             url("https://rickandmortyapi.com/api/")
-        }
+        }*/
 
         install(Logging) {
             logger = Logger.ANDROID
@@ -28,6 +29,15 @@ class KtorClient {
             json(Json {
                 ignoreUnknownKeys = true
             })
+        }
+    }
+    object ApiClient {
+        val httpClient = HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true // Ignora campos desconocidos en el JSON
+                })
+            }
         }
     }
 
